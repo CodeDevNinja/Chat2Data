@@ -1,6 +1,7 @@
 import sqlalchemy
+import json
 
-
+from llm.openais import dim_measure
 class DBInspector:
     def __init__(self, db_url):
         self.engine = sqlalchemy.create_engine(db_url)
@@ -8,15 +9,22 @@ class DBInspector:
     def get_table_names(self):
         inspector = sqlalchemy.inspect(self.engine)
         return inspector.get_table_names()
-
-    def execute_query(self, query):
+    
+    def execute_query(self, query, return_type="table"):
         with self.engine.connect() as connection:
             result = connection.execute(sqlalchemy.text(query))
             headers = [col.name for col in result.cursor.description]
-            rows = []
-            for row in result:
-                rows.append(list(row))
-            return {"headers": headers, "rows": rows}
+            if return_type=="table":
+                dim_mesures =json.loads(dim_measure(headers))
+                print(dim_mesures,type(dim_mesures))
+                rows = []
+                for row in result:
+                    rows.append(list(row))
+                d ={"headers": headers, "rows": rows}
+                d.update(dim_mesures)
+                return d
+            elif return_type=="dataframe":
+                pass
 
     def get_table_columns(self, table_name):
         inspector = sqlalchemy.inspect(self.engine)

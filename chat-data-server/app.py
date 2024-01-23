@@ -30,12 +30,13 @@ from database import DBInspector
 
 inspector = DBInspector("postgresql://postgres:example@143.47.186.111:5432/postgres")
 
-from llms.openai import text2sql
+from llm.openais import text2sql
 
 
 @api_v1.route("/analytics/data", methods=["GET"])
 def analytics_data():
-    """自然语言转换成sql查询语句
+    """
+    自然语言转换成sql查询语句
     Raises:
         Exception: _description_
     Returns:
@@ -53,6 +54,8 @@ def analytics_data():
         return {"code": 100, "message": f"查询失败{str(e)}"}
 
 
+from templates.template import line_chart_template
+
 @api_v1.route("/generate/chart/option", methods=["GET"])
 def generate_chart_option():
     """生成 echart  option 参数
@@ -69,7 +72,8 @@ def generate_chart_option():
         if not (cahrt_type and query_sql):
             raise Exception("请输入查询内容")
         datas = inspector.execute_query(query_sql)
-        return {"code": 200, "message": "查询成功", "data": datas}
+        line_chart_template.format(xAxis="", series="")
+        return {"code": 200, "message": "查询成功", "option": datas}
     except Exception as e:
         return {"code": 100, "message": f"查询失败{str(e)}"}
 

@@ -2,6 +2,8 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 import os
 from langchain_openai import AzureChatOpenAI
+import sys
+sys.path.append(os.getcwd())
 
 from config.config import (
     AZURE_DEPLOYMENT,
@@ -12,6 +14,7 @@ from config.config import (
 os.environ["AZURE_OPENAI_API_KEY"] = AZURE_OPENAI_API_KEY
 os.environ["AZURE_OPENAI_ENDPOINT"] = AZURE_OPENAI_ENDPOINT
 
+# from langchain.llms.openai import AzureChatOpenAI
 model = AzureChatOpenAI(
     openai_api_version=OPENAI_API_VERSION,
     azure_deployment=AZURE_DEPLOYMENT,
@@ -38,6 +41,7 @@ def run_query(query):
     return db.run(query)
 
 
+
 sql_response = (
     RunnablePassthrough.assign(schema=get_schema)
     | prompt
@@ -50,3 +54,35 @@ from langchain.chains.sql_database.query import create_sql_query_chain
 def text2sql(text):
     chain = create_sql_query_chain(model, db)
     return chain.invoke({"question": text})
+
+
+
+
+# from database import DBInspector
+# inspector = DBInspector("postgresql://postgres:example@143.47.186.111:5432/postgres")
+
+from langchain.output_parsers.openai_functions import JsonOutputFunctionsParser
+
+def dim_measure(columns):
+    """
+    区分维度和度量
+    """
+    # columns = inspector.get_table_columns(table_name)
+    template = """
+        # ROLE:  Data Analyst
+        ## Goals:  To distinguishing between "dimensions" and "metrics" in a given set of data. Please consider step by step
+        columns: 
+        ---
+        {columns}
+        ---
+        ## CONTRACT:
+            1. Please output only the JSON format; an explanation is not needed.
+        ## OutputFormat[JSON]  {{"dimension":["d1"], "metircs": ["m1"] }}
+        """
+    prompt = ChatPromptTemplate.from_template(template)
+    chain = prompt | model  
+    # | JsonOutputFunctionsParser()
+    return chain.invoke({"columns": columns}).content
+
+if __name__=="__main__":
+    print(dim_measure('ad_group'))

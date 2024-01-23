@@ -1,1 +1,3 @@
 sql
+chat-data-server/.env
+chat-data-server/config/config.yaml
