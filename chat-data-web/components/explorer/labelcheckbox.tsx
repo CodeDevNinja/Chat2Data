@@ -1,13 +1,46 @@
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-
+import React, { useState, useEffect } from 'react';
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
-export default function LabelCheckbox() {
+} from "@/components/ui/popover";
+
+interface Props {
+  dimensions: string[];
+  metrics: string[];
+  handleCheckboxChange: (id: string) => any;
+  handleCheckboxMetricChange: (id: string) => any;
+  selectedDimensions: string[];
+  selectedMetrics: string[];
+}
+
+export default function LabelCheckbox({ dimensions, metrics, handleCheckboxChange, handleCheckboxMetricChange, selectedDimensions, selectedMetrics }: Props) {
+
+
+  function clickBox(e: any, type: string) {
+    if (type === 'dimensions') {
+
+      handleCheckboxChange(e.target.id);
+    } else if (type === 'metrics') {
+      handleCheckboxMetricChange(e.target.id);
+    }
+  }
+
+
+  function renderCheckboxItems(items: string[], selectedItems: string[], onClick: (e: any) => void) {
+    return items.map((value) => (
+      <div className="grid gap-2" key={value}>
+        <div className="grid grid-cols-3 items-center gap-4">
+          <Checkbox id={value} onClick={onClick} checked={selectedItems.includes(value)} />
+          <Label htmlFor="terms">{value}</Label>
+        </div>
+      </div>
+    ));
+  }
+
   return (
     <div>
       <Popover>
@@ -22,53 +55,22 @@ export default function LabelCheckbox() {
                 Set the dimensions for the layer.
               </p>
             </div>
+            {renderCheckboxItems(dimensions, selectedDimensions, (e) => clickBox(e, 'dimensions'))}
+
             <div className="grid gap-2">
-              <div className="grid grid-cols-3 items-center gap-4">
-                <Checkbox id="terms" />
-                <Label htmlFor="terms">impressions</Label>
-              </div>
               <div className="grid gap-4">
                 <div className="space-y-2">
                   <h4 className="font-medium leading-none">Metrics</h4>
                   <p className="text-sm text-muted-foreground">
-                    Set the dimensions for the layer.
+                    Set the Metrics for the layer.
                   </p>
                 </div>
-                <div className="grid gap-2">
-                  <div className="grid grid-cols-3 items-center gap-4">
-                    <Checkbox id="terms" />
-                    <Label htmlFor="terms">impressions</Label>
-                  </div>
-                </div>
+                {renderCheckboxItems(metrics, selectedMetrics, (e) => clickBox(e, 'metrics'))}
               </div>
-              {/* <div className="grid grid-cols-3 items-center gap-4">
-                <Label htmlFor="maxWidth">Max. width</Label>
-                <Input
-                  id="maxWidth"
-                  defaultValue="300px"
-                  className="col-span-2 h-8"
-                />
-              </div>
-              <div className="grid grid-cols-3 items-center gap-4">
-                <Label htmlFor="height">Height</Label>
-                <Input
-                  id="height"
-                  defaultValue="25px"
-                  className="col-span-2 h-8"
-                />
-              </div>
-              <div className="grid grid-cols-3 items-center gap-4">
-                <Label htmlFor="maxHeight">Max. height</Label>
-                <Input
-                  id="maxHeight"
-                  defaultValue="none"
-                  className="col-span-2 h-8"
-                />
-              </div>*/}
             </div>
           </div>
         </PopoverContent>
       </Popover>
     </div>
-  )
+  );
 }

@@ -56,6 +56,9 @@ def analytics_data():
 
 from templates.template import line_chart_template
 
+import json
+
+
 @api_v1.route("/generate/chart/option", methods=["GET"])
 def generate_chart_option():
     """生成 echart  option 参数
@@ -69,17 +72,66 @@ def generate_chart_option():
     try:
         cahrt_type = request.args.get("chartType", type=str)
         query_sql = request.args.get("querySQL", type=str)
+        dimension = request.args.get("dimension", type=str)
+        metric = request.args.get("metric", type=str)
         if not (cahrt_type and query_sql):
             raise Exception("请输入查询内容")
-        datas = inspector.execute_query(query_sql)
-        line_chart_template.format(xAxis="", series="")
-        return {"code": 200, "message": "查询成功", "option": datas}
+        datas = inspector.execute_query(query_sql, return_type="dataframe")
+        # print(datas[dimension].tolist())
+        series = []
+        # for m in metric.split(","):
+        #     series.append({
+        #             "name": m,
+        #             "type": "line",
+        #             "stack": "Total",
+        #             "data": datas[m].astype(str).tolist()
+        #         })
+
+        # line_chart_template["xAxis"]["data"] = [datas[dimension].tolist()]
+        # line_chart_template["series"] = [series]
+        # print(2,line_chart_template)
+        # Convert the updated JSON object to a string (if needed)
+        # updated_json_string = json.dumps(line_chart_template, indent=2)
+
+        # print(datas[metric].tolist())
+        # print(1, str(datas[dimension].tolist()))
+        # option_str = json.loads(line_chart_template.format(xAxis=str(datas[dimension].tolist()), series=str(series)),)
+        da = {
+            "tooltip": {"trigger": "axis"},
+            "legend": {"data": ["Impressions"]},
+            "grid": {"left": "3%", "right": "4%", "bottom": "3%", "containLabel": "true"},
+            "xAxis": {
+                "type": "category",
+                "boundaryGap": "false",
+                "data": [
+                    "2022-02-04",
+                    "2022-02-04",
+                    "2022-04-04",
+                    "2022-04-04",
+                    "2022-06-04",
+                    "2022-06-04",
+                    "2022-08-04",
+                    "2022-08-04",
+                    "2022-12-04",
+                    "2022-12-04",
+                ],
+            },
+            "yAxis": {"type": "value"},
+            "series": [
+                {
+                    "name": "Impressions",
+                    "type": "line",
+                    "stack": "Total",
+                    "data": [1500, 1200, 1000, 800, 2500, 2000, 1800, 1500, 1200, 1000],
+                }
+            ],
+        }
+        return {"code": 200, "message": "查询成功", "option": da}
     except Exception as e:
         return {"code": 100, "message": f"查询失败{str(e)}"}
 
 
-
-# def 
+# def
 
 # @api_v1.route('/list/dir', methods=['GET'])
 # def list_dir():

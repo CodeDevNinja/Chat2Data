@@ -77,7 +77,7 @@ def dim_measure(columns):
         ---
         ## CONTRACT:
             1. Please output only the JSON format; an explanation is not needed.
-        ## OutputFormat[JSON]  {{"dimension":["d1"], "metircs": ["m1"] }}
+        ## OutputFormat[JSON]  {{"dimensions":["d1"], "mertics": ["m1"] }}
         """
     prompt = ChatPromptTemplate.from_template(template)
     chain = prompt | model  

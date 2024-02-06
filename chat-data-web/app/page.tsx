@@ -26,7 +26,7 @@ import ReactECharts from 'echarts-for-react';
 
 import { useEffect, useState, useRef } from 'react';
 
-import getAnalysticDataByLang from '@/app/api/query'
+import { getAnalysticDataByLang, generateChartOption } from '@/app/api/query'
 import Sidebar from '@/components/layout/sidebar'
 import {
   Pagination,
@@ -51,6 +51,8 @@ export default function Home() {
   const [disTabOrChart, setDisTabOrChart] = useState(false)
   const [disData, setDisData] = useState(true)
   const [sql, setSQL] = useState("")
+  const [dimensions, setDimensions] = useState<string[]>([])
+  const [metrics, setMetrics] = useState<string[]>([])
 
   const tableData: TableData = {
     headers: [],
@@ -62,6 +64,34 @@ export default function Home() {
   const [naturalLang, setNaturalLang] = useState('')
   const [loading, setLoading] = useState(false)
 
+
+  const [selectedDimensions, setSelectedDimensions] = useState<string[]>([]);
+  const [selectedMetrics, setSelectedMetrics] = useState<string[]>([]);
+
+  const handleCheckboxChange = (dimension: string) => {
+    // Check if the dimension is already selected
+    const isSelected = selectedDimensions.includes(dimension);
+    // If it's selected, remove it; otherwise, add it to the array
+    setSelectedDimensions(prevDimensions =>
+      isSelected
+        ? prevDimensions.filter(dim => dim !== dimension)
+        : [...prevDimensions, dimension]
+    );
+    return selectedDimensions
+  };
+
+  const handleCheckboxMetricChange = (dimension: string) => {
+    // Check if the dimension is already selected
+    const isSelected = selectedMetrics.includes(dimension);
+    // If it's selected, remove it; otherwise, add it to the array
+    setSelectedMetrics(prevDimensions =>
+      isSelected
+        ? prevDimensions.filter(dim => dim !== dimension)
+        : [...prevDimensions, dimension]
+    );
+    return selectedMetrics
+  };
+
   async function loadDatas(currentPage: number) {
     if (loading) return
     try {
@@ -69,6 +99,8 @@ export default function Home() {
       const { data } = await getAnalysticDataByLang({ "natural_lang": naturalLang });
       setDatas(data)
       setSQL(data.sql)
+      setDimensions(data.dimensions)
+      setMetrics(data.metrics)
       setDisData(false)
     } catch (error) {
       console.error('Failed to load user data:', error);
@@ -77,8 +109,22 @@ export default function Home() {
     }
   }
 
-  const getOption = (): any => {
-    let option = {}
+
+  const getOption =()=> {
+    let option
+    // let a =  await generateChartOption({ "dimension": selectedDimensions.join(","), "metric": selectedMetrics.join(","), "querySQL": sql, "chartType": chartType })
+    let a = (async () => {
+      const result = await generateChartOption({ "dimension": selectedDimensions.join(","), "metric": selectedMetrics.join(","), "querySQL": sql, "chartType": chartType })
+
+      // 继续处理异步结果
+  })();
+    // let { option } =  
+    option = a
+    // getOption1()
+    console.log(a)
+    return a
+       // let option = {}
+    // console.log(option)
     if (chartType == "lineChart") {
       option = {
         tooltip: {
@@ -260,6 +306,8 @@ export default function Home() {
         ],
       }
     }
+    // option =option
+    console.log(option)
     return option
   }
 
@@ -270,12 +318,17 @@ export default function Home() {
     }
   }
 
+
+
+
   const handleInputChange = (e: any) => {
     setNaturalLang(e.target.value)
   }
   const [chartType, setChartType] = useState('')
 
   const handleIconClick = (icon: any) => {
+    console.log(selectedDimensions)
+    console.log(selectedMetrics)
     console.log(`Icon clicked in parent: ${icon}`);
     if (icon == "sheet") {
       setDisTabOrChart(false)
@@ -388,7 +441,7 @@ export default function Home() {
                   </Table>}
               </CardContent>
               <CardFooter className="flex  flex-col items-center  ">
-                <Toolbar onIconClick={handleIconClick} />
+                <Toolbar onIconClick={handleIconClick} metrics={metrics} dimensions={dimensions} handleCheckboxChange={handleCheckboxChange} handleCheckboxMetricChange={handleCheckboxMetricChange} selectedDimensions={selectedDimensions} selectedMetrics={selectedMetrics} />
                 {/* @copyright */}
                 {/* <Button variant="outline">Cancel</Button>
           <Button>Deploy</Button> */}

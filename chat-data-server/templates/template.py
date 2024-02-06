@@ -1,9 +1,8 @@
-line_chart_template = """{
-    xAxis: {type: "category", 
-            data: {{xAxis}}},
-    yAxis: {type: "value"},
-    series: [{{series}}],
-}"""
+line_chart_template = {
+    "xAxis": {"type": "category", "data": "{xAxis}"},
+    "yAxis": [{"type": "value"}],
+    "series": ["{series}"],
+}
 
 # pie_chart = {
 #     title: {text: "Referer of a Website", subtext: "Fake Data", left: "center"},
